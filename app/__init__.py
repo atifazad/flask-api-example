@@ -11,6 +11,7 @@ def create_app():
 
     with app.app_context():
         from . import models
+        from . import api
 
         db.create_all()
 

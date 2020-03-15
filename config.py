@@ -30,3 +30,4 @@ class Config:
         port=DATABASE_PORT,
         db_name=DATABASE_NAME
     )
+    SESSION_LENGTH = int(os.getenv('SESSION_LENGTH'))

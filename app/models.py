@@ -17,7 +17,7 @@ class User(db.Model):
     )
 
     password = db.Column(
-        db.String(30),
+        db.String(64),
         index=False,
         unique=False,
         nullable=False
@@ -33,16 +33,49 @@ class User(db.Model):
     created_at = db.Column(
         db.DateTime,
         index=False,
-        unique=True,
         nullable=False
     )
 
     updated_at = db.Column(
         db.DateTime,
         index=False,
-        unique=True,
         nullable=False
     )
 
+    auth_tokens = db.relationship('AuthToken', backref='user')
+
     def __repr(self):
         return '<User {}>'.format(self.username)
+
+class AuthToken(db.Model):
+
+    __tablename__ = 'auth_tokens'
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False
+    )
+
+    token = db.Column(
+        db.String(64),
+        nullable=False,
+        unique=True
+    )
+
+    expires_at = db.Column(
+        db.DateTime,
+        index=False,
+        nullable=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        index=False,
+        nullable=False
+    )
