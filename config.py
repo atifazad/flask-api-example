@@ -3,14 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# APP_ROOT = os.path.join(os.path.dirname(__file__), '..')   # refers to application_top
-# dotenv_path = os.path.join(APP_ROOT, '.env')
-# load_dotenv(dotenv_path)
-
 class Config:
-    """
-
-    """
 
     ENV = os.getenv('FLASK_ENV', 'development')
     FLASK_DEBUG = os.getenv('FLASK_DEBUG', True)
