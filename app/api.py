@@ -17,25 +17,38 @@ def create_user():
 
         response = None
         try:
-            new_user = User(
-                username=username,
-                password=hashlib.sha256(str(password).encode('utf-8')).hexdigest(),
-                email=email,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
 
-            db.session.add(new_user)
-            db.session.commit()
+            existing_user = User.query.filter(
+                User.username == username
+            ).first()
 
-            response = response = {
-                'status': 'success',
-                'token': 'User regisrtered successfully.'
-            }
+            if existing_user == None:
+
+                new_user = User(
+                    username=username,
+                    password=hashlib.sha256(str(password).encode('utf-8')).hexdigest(),
+                    email=email,
+                    created_at=datetime.now(),
+                    updated_at=datetime.now()
+                )
+
+                db.session.add(new_user)
+                db.session.commit()
+
+                response = response = {
+                    'status': 'success',
+                    'token': 'User regisrtered successfully.'
+                }
+            else:
+                response = response = {
+                    'status': 'failed',
+                    'token': 'User {} already exists'.format(username)
+                }
+
         except Exception as error:
             response = response = {
                 'status': 'failed',
-                'token': 'User registration failed.'
+                'token': 'User registration failed. {}'.format(error)
             }
 
     return response
