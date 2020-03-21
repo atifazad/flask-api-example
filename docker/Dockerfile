@@ -1,5 +1,7 @@
+# Start with Python 3.8 base image
 FROM python:3.8-alpine
 
+# Show stdout and stderr outputs instantly without buffering
 ENV PYTHONUNBUFFERED 1
 
 # Create application root directory in container
@@ -11,6 +13,7 @@ WORKDIR /dockerised-example
 # Copy requirements.txt in application root directory
 ADD requirements.txt /dockerised-example/
 
+# Install dependencies
 RUN \
     # Install curl
     apk add --no-cache curl && \
@@ -25,7 +28,8 @@ RUN \
 ADD ./ /dockerised-example/
 COPY docker/entrypoint.sh /sbin/entrypoint.sh
 
+# Expose a port so that we can map it with a host port
 EXPOSE 5000
 
-# Execute command when container starts
+# Execute command when container starts (not executed with image build)
 ENTRYPOINT ["/sbin/entrypoint.sh"]
