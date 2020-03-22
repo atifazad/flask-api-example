@@ -13,9 +13,10 @@ def create_user():
     password = request.form.get('password')
     email = request.form.get('email')
 
+    response = None
+
     if username != None and password != None and email != None:
 
-        response = None
         try:
 
             existing_user = User.query.filter(
@@ -34,21 +35,29 @@ def create_user():
 
                 db.session.add(new_user)
                 db.session.commit()
+                print('NEW user ID: {}'.format(new_user.id))
 
-                response = response = {
+                token = __generate_auth_token()
+                __save_auth_token(new_user.id, token)
+                print('Generated auth token successfully')
+
+                response = {
                     'status': 'success',
-                    'token': 'User regisrtered successfully.'
+                    'token': token,
+                    'id': new_user.id,
+                    'username': new_user.username,
+                    'email': new_user.email
                 }
             else:
                 response = response = {
                     'status': 'failed',
-                    'token': 'User {} already exists'.format(username)
+                    'message': 'User {} already exists'.format(username)
                 }
 
         except Exception as error:
             response = response = {
                 'status': 'failed',
-                'token': 'User registration failed. {}'.format(error)
+                'message': 'User registration failed. {}'.format(error)
             }
 
     return response
@@ -67,25 +76,20 @@ def authenticate():
 
         if authenticated != None:
 
-            token = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(64)])
+            token = __generate_auth_token()
+
             if len(authenticated.auth_tokens) > 0:
                 token = authenticated.auth_tokens[0].token if authenticated.auth_tokens[0].expires_at <= datetime.now() \
                     else authenticated.auth_tokens[0].token
             else:
-
-                auth_token = AuthToken(
-                    user_id=authenticated.id,
-                    token=token,
-                    expires_at= datetime.now() + timedelta(seconds=app.config.get('SESSION_LENGTH')),
-                    created_at=datetime.now()
-                )
-            
-                db.session.add(auth_token)
-                db.session.commit()
+                __save_auth_token(authenticated.id, token)
 
             response = {
                 'status': 'success',
-                'token': token
+                'token': token,
+                'id': authenticated.id,
+                'username': authenticated.username,
+                'email': authenticated.email
             }
         else:
             response = {
@@ -99,3 +103,17 @@ def authenticate():
         }
 
     return response
+
+def __generate_auth_token():
+    return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(64)])
+
+def __save_auth_token(user_id, token):
+    auth_token = AuthToken(
+        user_id=user_id,
+        token=token,
+        expires_at= datetime.now() + timedelta(seconds=app.config.get('SESSION_LENGTH')),
+        created_at=datetime.now()
+    )
+
+    db.session.add(auth_token)
+    db.session.commit()
